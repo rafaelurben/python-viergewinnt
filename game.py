@@ -73,16 +73,10 @@ class VierGewinnt():
     @property
     def rows(self):
         return self.__game
-
-    def row(self, n: int):
-        return self.rows(n)
-
+        
     @property
     def cols(self):
         return [[self.rows[h][w] for h in range(self.height)] for w in range(self.width)]
-
-    def col(self, n:int):
-        return self.cols(n)
 
     @property
     def dias(self):
@@ -185,7 +179,9 @@ class VierGewinnt():
 
 if __name__ == "__main__":
     try:
-        g = VierGewinnt()
-        g.main()
+        while True:
+            g = VierGewinnt()
+            g.main()
+            input("\nDrücke eine Taste um nochmals zu spielen!")
     except KeyboardInterrupt:
         pass
