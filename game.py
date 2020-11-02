@@ -5,8 +5,8 @@ from rich.table import Table
 from rich.text import Text
 from rich.style import Style
 from rich.console import Console, RenderGroup
-from rich import pretty
-pretty.install()
+
+from bot import VierGewinntBot
 
 ### Helper functions
 
@@ -28,16 +28,24 @@ COLORNAMES = [
     "Blau",
 ]
 
+COLORSYMBOLS = [
+    "  ",
+    "--",
+    "~~",
+]
+
 ### Classes
 
 class VierGewinnt():
-    def __init__(self, width=7, height=6):
+    def __init__(self, width=7, height=6, bot=False):
         self.width = width
         self.height = height
 
         self.__game = [[0 for w in range(self.width)] for h in range(self.height)]
 
         self.current_player = 1
+
+        self.bot = bot
 
     # Print
 
@@ -49,7 +57,7 @@ class VierGewinnt():
             gtb.add_column(str(i+1).zfill(2), justify="center")
         for r in self.__game:
             gtb.add_row(
-                *[Text("  ", style=Style(bgcolor="rgb"+str(COLORS[p]))) for p in r]
+                *[Text(COLORSYMBOLS[p], style=Style(bgcolor="rgb"+str(COLORS[p]))) for p in r]
             )
 
         ctb = Table("N", "CO", "FARBE", title="Spieler", show_lines=True)
@@ -57,7 +65,7 @@ class VierGewinnt():
             ctb.add_row(
                 Text(str(i), style=Style(
                     underline=self.current_player == i)), 
-                Text("  ", style=Style(
+                Text(COLORSYMBOLS[i], style=Style(
                     bgcolor="rgb"+str(COLORS[i]))), 
                 Text(str(COLORNAMES[i])),
             )
@@ -171,6 +179,18 @@ class VierGewinnt():
                     if winner:
                         print(COLORNAMES[winner], "hat das Spiel gewonnen!")
                         break
+                    elif self.bot:
+                        self._add_to_column(VierGewinntBot.get_best_move(self.__game, botnr=2, maxdepth=3))
+                        self.print()
+
+                        if self._is_full():
+                            print("Das Spielfeld ist voll!")
+                            break
+                        else:
+                            winner = self._get_winner()
+                            if winner:
+                                print(COLORNAMES[winner], "hat das Spiel gewonnen!")
+                                break
             except ValueError:
                 self.print()
                 print("Dies ist keine Zahl!")
@@ -180,7 +200,7 @@ class VierGewinnt():
 if __name__ == "__main__":
     try:
         while True:
-            g = VierGewinnt()
+            g = VierGewinnt(bot=bool(input("Gegen einen Bot spielen? ")))
             g.main()
             input("\nDrücke eine Taste um nochmals zu spielen!")
     except KeyboardInterrupt:
